@@ -1,0 +1,38 @@
+# Onda Live en el servidor (192.168.0.50).
+#
+#   docker compose -f deploy/compose.yaml up -d --build
+#
+# El túnel de Cloudflare envía live.lockthard.es -> http://192.168.0.50:8087.
+# El TLS lo termina Cloudflare, así que el origen va por HTTP.
+services:
+  onda-live:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: onda-live:2.9.6
+    container_name: onda-live
+    restart: unless-stopped
+    user: "1000:1000"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=16m
+    ports:
+      - "8087:8087"
+    environment:
+      PORT: "8087"
+      NODE_ENV: "production"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8087/__health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"

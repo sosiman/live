@@ -1,0 +1,42 @@
+# ------------------------------------------------------------------ secretos
+# Certificados y claves TLS (el servidor local genera los suyos).
+certs/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Ficheros de entorno y credenciales de cualquier tipo.
+.env
+.env.*
+*.env
+credentials*
+credential*
+*secret*
+*token*
+*.kdbx
+
+# Claves de API sueltas (la app es BYOK: la clave vive en el navegador).
+api google*
+apikey*
+api-key*
+
+# ------------------------------------------------------------- desarrollo
+node_modules/
+*.log
+*.bak
+*.bak.*
+*.tgz
+*.tar.gz
+.DS_Store
+Thumbs.db
+
+# Capturas de pruebas puntuales (las de docs/ si se versionan).
+docs/tam-*.png
+docs/fouc-*.png
+docs/zoom-*.png
+docs/asa-abierto.png
+docs/asa-recogido.png
+docs/asa-subiendo.png
+docs/asa-texto-leyendo.png

@@ -1,0 +1,15 @@
+{
+  "name": "onda-live",
+  "version": "2.9.6",
+  "private": true,
+  "type": "module",
+  "description": "Conversación y traducción en vivo con Gemini Live API (BYOK)",
+  "scripts": {
+    "start": "node server.mjs",
+    "icons": "node scripts/make-icons.mjs",
+    "verify": "node scripts/verify-app.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

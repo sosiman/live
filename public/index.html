@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="es" class="cargando">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content" />
+<title>Onda Live</title>
+<meta name="description" content="Habla y traduce en tiempo real con Gemini Live API. Tu clave, tu navegador." />
+<meta name="theme-color" content="#FFF9EE" />
+<meta name="color-scheme" content="light" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Onda" />
+<style>
+  /* Pintado inmediato: evita ver el HTML sin estilos mientras llega el CSS.
+     Fondo crema desde el primer byte y la app oculta hasta que la hoja aplica. */
+  html { background:#FFF9EE; }
+  html.cargando body { visibility:hidden; }
+  html.cargando .sheet, html.cargando .sheet-backdrop { display:none !important; }
+  /* Sin fundido: la app aparece entera de golpe, sin frames a medias. */
+</style>
+<link rel="stylesheet" href="styles.css?v=2.9.6" onload="document.documentElement.classList.remove('cargando')" />
+</head>
+<body data-state="idle">
+
+<div class="phone" id="phone">
+  <header class="topbar">
+    <div class="brand"><span class="brand-dot"></span><span class="brand-name">onda</span><span class="pill-live" id="livePill" hidden>en vivo</span></div>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnFloat" title="Ventana flotante siempre encima" aria-label="Ventana flotante">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><rect x="11" y="9" width="8" height="9" rx="2" fill="currentColor" stroke="none" opacity=".85"/></svg>
+      </button>
+      <button class="icon-btn" id="btnSettings" title="Ajustes" aria-label="Ajustes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h9M17 17h3"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="15" cy="17" r="2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="view" id="view-listen">
+    <div class="chip-row">
+      <button class="chip" id="chipModel"><span id="chipModelLabel">modelo</span>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+
+    <div class="orb-wrap">
+      <div class="orb" id="orb">
+        <span class="orb-ring"></span><span class="orb-ring r2"></span><span class="orb-core"></span>
+        <div class="adn" id="adn" aria-hidden="true"></div>
+      </div>
+      <div class="vu" id="vu" title="Nivel de tu voz"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+
+    <p class="status" id="status">Listo cuando quieras</p>
+    <div class="contexto" title="Contexto acumulado del modelo">
+      <div class="contexto-barra"><span id="ctxBarra"></span></div>
+      <div class="contexto-texto" id="ctxTexto">Contexto: sin sesión</div>
+    </div>
+    <h1 class="primary" id="primary">Añade tu clave de Google y toca el micrófono</h1>
+    <button class="enlace" id="btnGetKey">🔑 Consigue tu clave en AI Studio</button>
+    <p class="secondary" id="secondary" hidden></p>
+    <p class="you" id="youLine" hidden></p>
+  </main>
+
+  <main class="view hidden" id="view-text">
+    <div class="panel-head">
+      <h2>Conversación</h2>
+      <div class="panel-actions">
+        <button class="mini" id="btnCopyAll">Copiar</button>
+        <button class="mini danger" id="btnClearTranscript">Limpiar</button>
+      </div>
+    </div>
+    <div class="transcript" id="transcript"></div>
+    <form class="composer" id="composer">
+      <input id="composerInput" placeholder="Escribe para hablar con la onda…" autocomplete="off" />
+      <button type="submit" class="send" aria-label="Enviar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
+      </button>
+    </form>
+  </main>
+
+  <main class="view hidden" id="view-research">
+    <div class="panel-head">
+      <h2>Lo que investiga</h2>
+      <div class="panel-actions">
+        <button class="mini" id="btnCopyResearch">Copiar</button>
+        <button class="mini danger" id="btnClearResearch">Limpiar</button>
+      </div>
+    </div>
+    <p class="note small">Cada búsqueda que hace Onda, con la consulta que usó y los enlaces de donde saca la información.</p>
+    <div id="researchList" class="research-list">
+      <p class="empty">Aquí aparecerá lo que Onda investigue. Pídele algo actual: «búscame las noticias de hoy».</p>
+    </div>
+  </main>
+
+  <main class="view hidden" id="view-board">
+    <div class="panel-head">
+      <h2>Panel</h2>
+      <div class="panel-actions">
+        <button class="mini danger" id="btnClearBoard">Limpiar</button>
+      </div>
+    </div>
+    <div class="board-actions">
+      <button class="wide-btn" id="btnResumen">Resumir lo hablado</button>
+    </div>
+    <form class="composer" id="boardComposer">
+      <input id="boardInput" placeholder="Pega aquí un resumen, una nota o un diagrama…" autocomplete="off" />
+      <button type="submit" class="send" aria-label="Añadir">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </form>
+    <p class="note small">Acepta texto, listas, <strong>negritas</strong> y bloques de código.</p>
+
+    <div class="panel-head"><h2>Contexto del modelo</h2></div>
+    <div id="ctxDetalle" class="tool-log"><p class="empty">Sin sesión abierta.</p></div>
+    <div id="boardList" class="board-list">
+      <p class="empty">Sin tarjetas todavía.</p>
+    </div>
+  </main>
+
+  <footer class="controls">
+    <!-- Barra de estado: siempre visible. Se anima con el micrófono y recoge los
+         mandos para dejar sitio a los textos. -->
+    <div class="asa" id="asa" role="button" tabindex="0" aria-expanded="true"
+         aria-label="Mostrar u ocultar los botones">
+      <span class="asa-punto"></span>
+      <span class="asa-texto" id="asaTexto">Micrófono apagado</span>
+      <button class="asa-mic" id="asaMic" aria-label="Encender o apagar el micrófono">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      </button>
+      <span class="asa-flecha" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </span>
+    </div>
+
+    <div class="mando" id="mando">
+    <div class="main-controls">
+      <button class="round" id="btnMeaning" title="Traducir lo último que se ha oído">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h9M8.5 5v2c0 3.5-2 6.5-4.5 8M6 9.5c1 2.5 3 4.5 5.5 5.5"/><path d="M13 20l4-9 4 9M14.4 17h5.2"/></svg>
+        <span>Qué dijo</span>
+      </button>
+      <button class="mic" id="btnMic" aria-label="Micrófono">
+        <svg class="ic-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        <svg class="ic-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2.5"/></svg>
+      </button>
+      <button class="round" id="btnEnd" title="Terminar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14c4.5-4.5 11.5-4.5 16 0l-2.5 3-4-2v-2.6a9.6 9.6 0 0 0-3 0V15l-4 2z"/></svg>
+        <span>Terminar</span>
+      </button>
+    </div>
+    <p class="hint" id="hint">Micrófono apagado</p>
+    </div>
+  </footer>
+
+  <nav class="tabbar">
+    <button class="tab active" data-view="listen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 12v0M8 8v8M12 5v14M16 8v8M20 12v0"/></svg>
+      Escucha
+    </button>
+    <button class="tab" data-view="text">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v10H9l-5 4z"/></svg>
+      Texto
+    </button>
+    <button class="tab" data-view="research">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5L20 20"/></svg>
+      Investiga
+    </button>
+    <button class="tab" data-view="board">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M4 10h16M10 10v9"/></svg>
+      Panel
+    </button>
+  </nav>
+</div>
+
+<div class="sheet-backdrop" id="backdrop" hidden></div>
+<section class="sheet" id="sheetSettings" hidden aria-modal="true" role="dialog">
+  <header class="sheet-head"><h2>Ajustes</h2><button class="icon-btn" data-close>✕</button></header>
+  <div class="sheet-body">
+    <label class="field">
+      <span>Clave de API de Google (BYOK)</span>
+      <input id="apiKey" type="password" placeholder="Pega aquí tu clave…" autocomplete="off" spellcheck="false" />
+      <small id="keyState">Se guarda solo en este navegador.</small>
+      <button type="button" class="enlace" id="btnGetKey2">🔑 Conseguir una clave en AI Studio</button>
+    </label>
+    <div class="row">
+      <button class="wide-btn" id="btnLoadModels">Cargar modelos de mi clave</button>
+      <button class="wide-btn ghost" id="btnForgetKey">Olvidar clave</button>
+    </div>
+
+    <label class="field"><span>Modelo</span><select id="modelSelect"></select>
+      <small id="modelInfo">Los modelos se leen de tu clave.</small>
+    </label>
+
+    <label class="field"><span>Voz de Onda</span><select id="voiceSelect"></select></label>
+
+    <label class="field"><span>Tu idioma (responde y traduce hacia ti en él)</span>
+      <select id="meaningLang">
+        <option value="es">Español</option>
+        <option value="en">English (inglés)</option>
+        <option value="de">Deutsch (alemán)</option>
+        <option value="uk">Українська (ucraniano)</option>
+        <option value="zh">中文 (chino)</option>
+        <option value="pt">Português (portugués)</option>
+        <option value="fr">Français (francés)</option>
+        <option value="it">Italiano</option>
+        <option value="ru">Русский (ruso)</option>
+        <option value="ar">العربية (árabe)</option>
+        <option value="ja">日本語 (japonés)</option>
+        <option value="ko">한국어 (coreano)</option>
+        <option value="pl">Polski</option>
+        <option value="ro">Română</option>
+        <option value="tr">Türkçe</option>
+      </select>
+      <small>Tu idioma: en él te responde y traduce lo que digan otros. El idioma de la otra persona lo detecta solo (ucraniano, inglés, el que sea).</small>
+    </label>
+
+    <label class="field"><span>Instrucciones (puedes cambiarlas o dejarlas vacías)</span>
+      <textarea id="systemInstruction" rows="5"></textarea>
+    </label>
+    <button type="button" class="wide-btn ghost" id="btnResetInstruction">Restaurar las de intérprete</button>
+
+    <label class="field"><span>Silencio para cerrar tu turno (ms)</span><input type="number" id="silenceMs" value="700" min="300" step="50" /></label>
+    <label class="field"><span>Volumen de la voz</span><input type="range" id="volume" min="0" max="100" value="100" /></label>
+    <button type="button" class="wide-btn ghost" id="btnDiagnostico">🩺 Diagnóstico de pantalla</button>
+    <pre class="diag" id="diagSalida" hidden></pre>
+    <button type="button" class="wide-btn" id="btnForceUpdate">🔄 Forzar actualización (limpia la caché)</button>
+    <p class="note small">Si ves una versión vieja: pulsa este botón. Borra la caché y el service worker de esta app y la recarga. No toca nada más del navegador.</p>
+
+    <p class="note small" id="about"></p>
+  </div>
+</section>
+
+<div class="toast" id="toast" hidden></div>
+<script>
+  /* === Autocuración de caché: funciona aunque app.js esté viejo === */
+  window.__ONDA_VERSION = '2.9.6';
+  window.__ondaLimpiar = function () {
+    try {
+      if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); });
+      if (window.caches) caches.keys().then(function (ks) { ks.forEach(function (k) { caches.delete(k); }); });
+    } catch (e) { /* nada */ }
+  };
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    while (t && t !== document.body) {
+      if (t.id === 'btnForceUpdate') {
+        e.preventDefault();
+        t.textContent = 'Actualizando…';
+        window.__ondaLimpiar();
+        setTimeout(function () { location.href = location.pathname + '?v=' + Date.now(); }, 900);
+        return;
+      }
+      t = t.parentNode;
+    }
+  });
+  setTimeout(function () { document.documentElement.classList.remove('cargando'); }, 2500);
+  addEventListener('load', function () {
+    setTimeout(function () {
+      try {
+        var cargada = window.Onda && window.Onda.version;
+        if (cargada && cargada !== window.__ONDA_VERSION) {
+          window.__ondaLimpiar();
+          setTimeout(function () { location.href = location.pathname + '?v=' + Date.now(); }, 600);
+        }
+      } catch (e) { /* nada */ }
+    }, 2000);
+  });
+</script>
+<script type="module" src="app.js?v=2.9.6"></script>
+</body>
+</html>

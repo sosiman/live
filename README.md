@@ -1,6 +1,9 @@
-# Onda Live
+# Forever
 
 **Conversación y traducción en vivo con latencia mínima sobre los modelos `gemini-3.8-live`.**
+
+*(El proyecto nació como «Onda Live»: el directorio, el contenedor y las claves
+internas del navegador conservan ese nombre para no perder ajustes ni romper el despliegue.)*
 
 PWA en modo **BYOK** (cada usuario pone su clave de Google): el navegador habla
 **directo** con la Gemini Live API por WebSocket. No hay backend de IA, ni cuentas,
@@ -8,7 +11,7 @@ ni base de datos, ni servidor que vea tu clave o tu audio.
 
 **En producción: <https://live.loktar.cc>**
 
-![La app escuchando](docs/escucha.png)
+![La app escuchando](docs/forever-escucha.png)
 
 ---
 

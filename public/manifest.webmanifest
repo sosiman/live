@@ -1,6 +1,6 @@
 {
-  "name": "Onda Live — habla y traduce en tiempo real",
-  "short_name": "Onda",
+  "name": "Forever — habla y traduce en tiempo real",
+  "short_name": "Forever",
   "description": "Conversación y traducción en vivo con Gemini Live API. Tu clave, tu navegador.",
   "lang": "es",
   "start_url": "./",

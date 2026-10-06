@@ -116,7 +116,8 @@ try {
   console.log('\n1) Arranque y PWA');
   await cdp.goto(URL_APP);
   ok = check('La app arranca', await cdp.evaluate('Boolean(window.Onda)')) && ok;
-  ok = check('Título correcto', (await cdp.evaluate('document.title')) === 'Onda Live') && ok;
+  ok = check('Título correcto', /^Forever/.test(await cdp.evaluate('document.title')), await cdp.evaluate('document.title')) && ok;
+  ok = check('El logo está en la cabecera', await cdp.evaluate('Boolean(document.querySelector(".brand-logo")) && document.querySelector(".brand-name").textContent === "Forever"'), 'logo + Forever') && ok;
   ok = check('Service worker registrado', (await cdp.evaluate('navigator.serviceWorker.getRegistrations().then(function (r) { return r.length; })')) >= 1) && ok;
 
   console.log('\n2) Clave y catálogo de modelos (BYOK)');

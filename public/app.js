@@ -1,31 +1,31 @@
 /**
- * Onda Live — aplicación.
+ * Forever — aplicación de conversación y traducción en vivo.
  *
  * Construida sobre la documentación oficial del Live API, sin inventos:
  *  · WebSocket directo del navegador a Google (BYOK). Este servidor solo sirve
  *    archivos: no ve la clave ni pasa audio.
- *  · Detección de voz del servidor: el usuario puede interrumpir a Onda
+ *  · Detección de voz del servidor: el usuario puede interrumpir a Forever
  *    hablando en cualquier momento, sin esperar a que termine.
  *  · Al recibir «interrupted» se descarta el búfer de voz al instante, como
  *    pide la guía de buenas prácticas.
  *  · El micrófono no se silencia nunca: la cancelación de eco del navegador es
- *    la que evita que Onda se oiga a sí misma.
+ *    la que evita que Forever se oiga a sí misma.
  */
-import { AudioEngine } from './audio.js?v=3.0.1';
-import { LiveSession, fetchModels, generateText, searchWeb, VOICES, modelCapabilities, explainLiveError } from './live.js?v=3.0.1';
-import { buildToolDeclarations, executeToolCall } from './tools.js?v=3.0.1';
+import { AudioEngine } from './audio.js?v=3.1.0';
+import { LiveSession, fetchModels, generateText, searchWeb, VOICES, modelCapabilities, explainLiveError } from './live.js?v=3.1.0';
+import { buildToolDeclarations, executeToolCall } from './tools.js?v=3.1.0';
 
-const APP_VERSION = '3.0.1';
+const APP_VERSION = '3.1.0';
 // Los nodos pueden estar en la ventana principal o en la flotante (se MUEVEN),
 // así que toda búsqueda se hace en el documento activo.
 const activeDoc = () => (pipWindow && pipWindow.document && pipWindow.document.body ? pipWindow.document : document);
 const $ = (id) => activeDoc().getElementById(id);
 const KEY_STORE = 'onda.settings.v2';
 
-const INTERPRETER_MARK = 'You are Onda, a real-time interpreter';
+const INTERPRETER_MARK = 'You are Forever, a real-time interpreter';
 // Sube este número cuando cambie el prompt de fábrica: así las instalaciones
 // existentes reciben el nuevo sin perder las que el usuario haya personalizado.
-const INSTRUCTION_VERSION = 3;
+const INSTRUCTION_VERSION = 4;
 
 function languageName(code) {
   const clean = String(code || 'es').split('-')[0].toLowerCase();
@@ -39,7 +39,7 @@ function languageName(code) {
 function defaultInstructions(targetCode) {
   const mio = languageName(targetCode || 'es');
   return [
-    'You are Onda, a real-time interpreter and voice assistant.',
+    'You are Forever, a real-time interpreter and voice assistant.',
     'YOU SPEAK: ' + mio + '. The person in front of the user may speak ANY language; detect it yourself and never ask which language it is.',
     '',
     'DEFAULT JOB - INTERPRET so both sides understand each other:',
@@ -53,7 +53,7 @@ function defaultInstructions(targetCode) {
     '- "modo conversacion", "para de traducir", "modo normal" -> stop translating and just talk with the user.',
     '- When you switch, say one short sentence in ' + mio + ' to confirm and then do it.',
     '',
-    'WHEN SOMEONE TALKS TO YOU DIRECTLY (a question, the name Onda, a request): answer briefly in ' + mio + ' and go back to interpreting.',
+    'WHEN SOMEONE TALKS TO YOU DIRECTLY (a question, the name Forever, a request): answer briefly in ' + mio + ' and go back to interpreting.',
     'ALWAYS ANSWER THE USER IN ' + mio.toUpperCase() + '.',
     'Keep every answer short and natural, like a person talking, never like a robot reading a text.',
     'If you hear nothing or it is unintelligible, say it in one short sentence in ' + mio + ' and wait. Never invent what you did not hear.',
@@ -288,7 +288,7 @@ const MEM_RECIENTE = 12;    // mensajes que van siempre tal cual
 async function prepararMemoria() {
   instruccionMemoria = '';
   if (!settings.rememberSessions || memoriaVacia()) return;
-  const texto = memoria.crudo.map((m) => (m.role === 'me' ? 'Tu: ' : 'Onda: ') + m.text).join('\n');
+  const texto = memoria.crudo.map((m) => (m.role === 'me' ? 'Tu: ' : 'Forever: ') + m.text).join('\n');
 
   const cabecera = 'CONTEXTO DE CONVERSACIONES ANTERIORES CON ESTE USUARIO (es trasfondo: no lo traduzcas, no lo leas en voz alta y no lo menciones salvo que te lo pidan):';
 
@@ -298,7 +298,7 @@ async function prepararMemoria() {
   }
 
   if (!memoria.resumen || memoria.sucio) {
-    const antiguo = memoria.crudo.slice(0, -MEM_RECIENTE).map((m) => (m.role === 'me' ? 'Tu: ' : 'Onda: ') + m.text).join('\n');
+    const antiguo = memoria.crudo.slice(0, -MEM_RECIENTE).map((m) => (m.role === 'me' ? 'Tu: ' : 'Forever: ') + m.text).join('\n');
     try {
       memoria.resumen = await generateText({
         apiKey: settings.apiKey, model: settings.textModel,
@@ -311,7 +311,7 @@ async function prepararMemoria() {
     } catch { /* sin resumen se sigue, simplemente sin memoria */ }
   }
   if (memoria.resumen) {
-    const recientes = memoria.crudo.slice(-MEM_RECIENTE).map((m) => (m.role === 'me' ? 'Tu: ' : 'Onda: ') + m.text).join('\n');
+    const recientes = memoria.crudo.slice(-MEM_RECIENTE).map((m) => (m.role === 'me' ? 'Tu: ' : 'Forever: ') + m.text).join('\n');
     instruccionMemoria = cabecera + '\n' + memoria.resumen + '\n\nUltimos mensajes, literales:\n' + recientes;
   }
 }
@@ -600,7 +600,7 @@ $('composer').addEventListener('submit', (event) => {
 });
 
 $('btnCopyAll').addEventListener('click', async () => {
-  const text = transcript.map((m) => (m.role === 'me' ? 'Tú: ' : 'Onda: ') + m.text).join('\n');
+  const text = transcript.map((m) => (m.role === 'me' ? 'Tú: ' : 'Forever: ') + m.text).join('\n');
   try { await navigator.clipboard.writeText(text); toast('Conversación copiada.', 2400); }
   catch { toast('El navegador bloqueó el portapapeles.'); }
 });
@@ -846,7 +846,7 @@ $('btnFloat').addEventListener('click', () => {
 if ('serviceWorker' in navigator && window.isSecureContext) {
   addEventListener('load', async () => {
     try {
-      const registro = await navigator.serviceWorker.register('sw.js?v=3.0.1');
+      const registro = await navigator.serviceWorker.register('sw.js?v=3.1.0');
       // Busca versión nueva en cada arranque.
       registro.update().catch(() => {});
       // Cuando el service worker nuevo toma el control, se recarga UNA vez:
@@ -869,14 +869,14 @@ const BOARD_STORE = 'onda.board.v1';
 let research = readJSON(RESEARCH_STORE, []);
 let board = readJSON(BOARD_STORE, []);
 
-/** «Investiga»: qué buscó Onda, con qué consulta y de dónde lo sacó. */
+/** «Investiga»: qué buscó Forever, con qué consulta y de dónde lo sacó. */
 function renderResearch() {
   const holder = $('researchList');
   holder.innerHTML = '';
   if (!research.length) {
     const p = document.createElement('p');
     p.className = 'empty';
-    p.textContent = 'Aquí aparecerá lo que Onda investigue. Pídele algo actual: «búscame las noticias de hoy».';
+    p.textContent = 'Aquí aparecerá lo que Forever investigue. Pídele algo actual: «búscame las noticias de hoy».';
     holder.appendChild(p);
     return;
   }
@@ -1021,7 +1021,7 @@ function addCard(titulo, texto) {
 }
 
 function transcripcionTexto(limite = 4000) {
-  return transcript.slice(-limite).map((m) => (m.role === 'me' ? 'Tú: ' : 'Onda: ') + m.text).join('\n');
+  return transcript.slice(-limite).map((m) => (m.role === 'me' ? 'Tú: ' : 'Forever: ') + m.text).join('\n');
 }
 
 $('boardComposer').addEventListener('submit', (event) => {
@@ -1069,7 +1069,7 @@ function boot() {
   syncUI();
   setState('idle');
   setMicState('off');
-  $('about').textContent = 'Onda Live v' + APP_VERSION + ' · ' + (isAndroid ? 'Android' : 'Escritorio') + (isStandalone ? ' · instalada' : '') + ' · clave ' + (settings.apiKey ? 'configurada' : 'pendiente');
+  $('about').textContent = 'Forever v' + APP_VERSION + ' · ' + (isAndroid ? 'Android' : 'Escritorio') + (isStandalone ? ' · instalada' : '') + ' · clave ' + (settings.apiKey ? 'configurada' : 'pendiente');
   if (!window.isSecureContext) toast('Sin HTTPS el micrófono está bloqueado. Abre la app con https://', 8000);
   renderResearch();
   renderBoard();
@@ -1088,7 +1088,7 @@ addEventListener('resize', ajustarZoom);
 try { boot(); } catch (err) { console.error('[onda] fallo al arrancar:', err); setStatus('Error al arrancar: ' + err.message); }
 
 // Asa para las pruebas automáticas y el diagnóstico desde la consola.
-window.Onda = {
+window.Forever = window.Onda = {
   version: APP_VERSION,
   get settings() { return settings; },
   get session() { return session; },

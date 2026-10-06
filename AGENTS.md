@@ -1,4 +1,9 @@
-# Onda Live — instrucciones para agentes
+# Forever (antes «Onda Live») — instrucciones para agentes
+
+> **Nombre visible: Forever.** El directorio (`onda-live`), el contenedor (`onda-live`),
+> el slug del health y las claves de `localStorage` (`onda.*`) conservan el nombre
+> antiguo a propósito: renombrarlos borraría ajustes y memoria de los usuarios y
+> obligaría a recrear el contenedor. El logo es `public/icons/logo.svg`.
 
 Documento de trabajo para cualquier agente (o persona) que toque este proyecto.
 Explica **qué es**, **cómo funciona por dentro** y **qué decisiones están tomadas
@@ -189,8 +194,9 @@ onda-live/
 │   ├── pcm-player-worklet.js  cola de reproducción continua a 24 kHz
 │   ├── sw.js, manifest.webmanifest, icons/
 ├── scripts/
-│   ├── verify-app.mjs         41 comprobaciones contra la API en Chrome real
-│   └── make-icons.mjs         iconos PNG sin dependencias
+│   ├── verify-app.mjs         42 comprobaciones contra la API en Chrome real
+│   ├── make-icons.mjs         iconos PNG sin dependencias
+│   └── render-icons.mjs       regenera los iconos desde icons/logo.svg (Chrome)
 └── docs/                      capturas de referencia
 ```
 
@@ -221,7 +227,7 @@ La verificación abre Chrome por CDP y comprueba de verdad: sesión abierta,
 configuración recomendada, ritmo de 32 kB/s, cancelación de eco activa, respuesta
 con voz, descarte del búfer al interrumpir, búsqueda real con fuentes, resumen,
 contexto en vivo, barra de estado con mandos que se recogen y ventana flotante.
-**Debe salir 41/41.**
+**Debe salir 42/42.**
 
 En el móvil hace falta HTTPS (el navegador no da micrófono sin contexto seguro):
 el certificado autofirmado se acepta una vez, o se instala desde `/certificado`.
@@ -269,7 +275,7 @@ curl -s https://live.loktar.cc/__health       # a través de Cloudflare
 
 ## 9. Estado y pendientes
 
-**Funciona y está verificado (41/41):** conversación, interrupción libre,
+**Funciona y está verificado (42/42):** conversación, interrupción libre,
 intérprete, búsqueda con fuentes en «Investiga», resúmenes y notas en «Panel»,
 contexto en vivo, barra de estado animada con mandos que se recogen, PWA,
 ventana flotante y despliegue en contenedor con purga de CDN.

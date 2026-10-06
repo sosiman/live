@@ -265,3 +265,6 @@ body[data-mandos="ocultos"] .mando { max-height:0; opacity:0; margin-top:0; }
 .check { display:flex; align-items:flex-start; gap:10px; font-size:14.5px; color:var(--ink);
   background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 14px; min-height:48px; }
 .check input { width:20px; height:20px; margin:1px 0 0; accent-color:var(--orange); flex:none; }
+
+/* ------------------------------------------------------------- marca */
+.brand-logo { width:30px; height:30px; display:block; border-radius:9px; box-shadow:0 2px 8px rgba(90,60,35,.18); }

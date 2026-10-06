@@ -7,7 +7,7 @@ Problema que resuelve: Cloudflare aplica un Browser Cache TTL de 4 horas a los
 HTML nuevo y el JS viejo (versiones mezcladas).
 
 Hace dos cosas:
-  1. Crea/actualiza una Cache Rule que DESACTIVA la cache para live.loktar.cc.
+  1. Crea/actualiza una Cache Rule que DESACTIVA la cache para wow.loktar.cc.
   2. Purga lo que ya estuviera cacheado de ese host.
 
 Uso:  python3 deploy/cloudflare-cache.py            (aplica)
@@ -21,7 +21,7 @@ import urllib.request
 
 ENV = "/root/.cloudflare.env"
 API = "https://api.cloudflare.com/client/v4"
-HOST = "live.loktar.cc"
+HOST = "wow.loktar.cc"
 ZONA_NOMBRE = "loktar.cc"
 DESCRIPCION = "Onda Live: sin cache (la app se actualiza en cada deploy)"
 

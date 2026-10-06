@@ -15,7 +15,7 @@ PWA en modo **BYOK** (cada usuario pone su clave de Google): el navegador habla
 **directo** con la Gemini Live API por WebSocket. No hay backend de IA, ni cuentas,
 ni base de datos, ni servidor que vea tu clave o tu audio.
 
-**En producción: <https://live.loktar.cc>**
+**En producción: <https://wow.loktar.cc>**
 
 ![La app escuchando](docs/forever-escucha.png)
 
@@ -121,7 +121,7 @@ Puedes instalarlo desde `/certificado`.
 
 ```sh
 node scripts/verify-app.mjs --key TU_CLAVE
-node scripts/verify-app.mjs --key TU_CLAVE --url https://live.loktar.cc
+node scripts/verify-app.mjs --key TU_CLAVE --url https://wow.loktar.cc
 ```
 
 Abre Chrome por CDP y comprueba **41 cosas contra la API real**: sesión abierta,

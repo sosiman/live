@@ -11,11 +11,11 @@
  *  · El micrófono no se silencia nunca: la cancelación de eco del navegador es
  *    la que evita que Forever se oiga a sí misma.
  */
-import { AudioEngine } from './audio.js?v=3.2.0';
-import { LiveSession, fetchModels, generateText, searchWeb, VOICES, modelCapabilities, explainLiveError } from './live.js?v=3.2.0';
-import { buildToolDeclarations, executeToolCall } from './tools.js?v=3.2.0';
+import { AudioEngine } from './audio.js?v=3.3.1';
+import { LiveSession, fetchModels, generateText, searchWeb, VOICES, modelCapabilities, explainLiveError } from './live.js?v=3.3.1';
+import { buildToolDeclarations, executeToolCall } from './tools.js?v=3.3.1';
 
-const APP_VERSION = '3.2.0';
+const APP_VERSION = '3.3.1';
 // Los nodos pueden estar en la ventana principal o en la flotante (se MUEVEN),
 // así que toda búsqueda se hace en el documento activo.
 const activeDoc = () => (pipWindow && pipWindow.document && pipWindow.document.body ? pipWindow.document : document);
@@ -774,6 +774,34 @@ $('btnDiagnostico').addEventListener('click', async () => {
   catch { toast('Diagnóstico en pantalla (el portapapeles está bloqueado).', 3200); }
 });
 
+/**
+ * Traslado de datos entre dominios o dispositivos. Los ajustes y la memoria viven
+ * en el localStorage del ORIGEN: al pasar a otro dominio se empieza de cero, asi que
+ * esto los copia en el portapapeles para pegarlos en el otro.
+ */
+$('btnExportar').addEventListener('click', async () => {
+  const paquete = { app: 'forever', version: APP_VERSION, exportado: new Date().toISOString(), settings, memoria, research, board };
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(paquete));
+    toast('Copiado. Pegalo en el otro dominio o dispositivo.', 4200);
+  } catch {
+    toast('El navegador bloqueo el portapapeles.', 4200);
+  }
+});
+
+$('btnImportar').addEventListener('click', async () => {
+  try {
+    const paquete = JSON.parse(await navigator.clipboard.readText());
+    if (paquete.settings) { Object.assign(settings, paquete.settings); saveSettings(); syncUI(); }
+    if (paquete.memoria) { memoria = paquete.memoria; guardarMemoria(); pintarMemoria(); }
+    if (paquete.research) { research = paquete.research; writeJSON(RESEARCH_STORE, research); renderResearch(); }
+    if (paquete.board) { board = paquete.board; writeJSON(BOARD_STORE, board); renderBoard(); }
+    toast('Ajustes y memoria importados.', 4200);
+  } catch (err) {
+    toast('No pude leer el portapapeles: ' + (err.message || err), 5000);
+  }
+});
+
 $('btnOlvidarMemoria').addEventListener('click', olvidarMemoria);
 $('rememberSessions').addEventListener('change', (e) => {
   settings.rememberSessions = e.target.checked;
@@ -864,7 +892,7 @@ $('btnFloat').addEventListener('click', () => {
 if ('serviceWorker' in navigator && window.isSecureContext) {
   addEventListener('load', async () => {
     try {
-      const registro = await navigator.serviceWorker.register('sw.js?v=3.2.0');
+      const registro = await navigator.serviceWorker.register('sw.js?v=3.3.1');
       // Busca versión nueva en cada arranque.
       registro.update().catch(() => {});
       // Cuando el service worker nuevo toma el control, se recarga UNA vez:

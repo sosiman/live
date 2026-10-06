@@ -2,14 +2,14 @@
 #
 #   docker compose -f deploy/compose.yaml up -d --build
 #
-# El túnel de Cloudflare envía live.loktar.cc -> http://192.168.0.50:8087.
+# El túnel de Cloudflare envía wow.loktar.cc -> http://192.168.0.50:8087.
 # El TLS lo termina Cloudflare, así que el origen va por HTTP.
 services:
   onda-live:
     build:
       context: ..
       dockerfile: Dockerfile
-    image: onda-live:3.2.0
+    image: onda-live:3.3.1
     container_name: onda-live
     restart: unless-stopped
     user: "1000:1000"

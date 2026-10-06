@@ -24,7 +24,7 @@ con Google. No hay backend de IA, ni cuentas, ni base de datos.
 - **Busca en Google de verdad** (con fuentes visibles) y **resume** lo hablado.
 - PWA instalable, formato móvil siempre, y **ventana flotante** en el escritorio.
 
-Producción: **https://live.loktar.cc** (Cloudflare Tunnel → contenedor en
+Producción: **https://wow.loktar.cc** (Cloudflare Tunnel → contenedor en
 `192.168.0.50:8087`).
 
 ---
@@ -124,7 +124,7 @@ tanto se estima con `bytes/1280` (25 tokens por segundo de audio).
    (600, token **de cuenta**, por eso `/user/tokens/verify` da «Invalid API Token» y hay
    que verificar con `/accounts/{id}/tokens/verify`). `deploy/cloudflare-cache.py` deja
    una Cache Rule con `cache: false` + `browser_ttl: respect_origin` para
-   `live.loktar.cc`, pone `browser_cache_ttl` de la zona en «respetar cabeceras» y
+   `wow.loktar.cc`, pone `browser_cache_ttl` de la zona en «respetar cabeceras» y
    purga. **`instalar.sh` ya lo ejecuta en cada despliegue y lo muestra en `estado`.**
    Resultado medido: `cache-control: no-cache` + `cf-cache-status: DYNAMIC` en
    `index.html`, `app.js`, `styles.css` y `sw.js`.
@@ -251,7 +251,7 @@ ssh root@192.168.0.50 'cd /opt/onda-live && ./deploy/instalar.sh desplegar'
   `no-new-privileges` y `tmpfs` de 16 MB. El demonio de Docker es rootful: si se
   quiere rootless de verdad hay que instalar Podman o Docker rootless (pendiente).
 - **Puerto 8087**: es el que espera el túnel (*Cloudflare Zero Trust* →
-  `live.loktar.cc` → `http://192.168.0.50:8087`).
+  `wow.loktar.cc` → `http://192.168.0.50:8087`).
 - **El TLS lo pone Cloudflare**, así que el origen va por HTTP. En el navegador la
   página es HTTPS y por eso el micrófono funciona.
 - **No hace falta WebSocket en el túnel**: la app habla con Google directamente.
@@ -260,7 +260,7 @@ Comprobación de que está vivo:
 
 ```sh
 curl -s http://192.168.0.50:8087/__health        # desde la red
-curl -s https://live.loktar.cc/__health       # a través de Cloudflare
+curl -s https://wow.loktar.cc/__health       # a través de Cloudflare
 ```
 
 ---

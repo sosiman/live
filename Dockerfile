@@ -2,12 +2,12 @@
 #
 # La app es 100 % estática: este contenedor solo reparte archivos. No ve tu
 # clave de Google y no pasa audio: el WebSocket va del navegador directo a
-# Google. El TLS lo pone Cloudflare (live.loktar.cc).
+# Google. El TLS lo pone Cloudflare (wow.loktar.cc).
 FROM node:22-alpine
 
 LABEL org.opencontainers.image.title="Onda Live" \
       org.opencontainers.image.description="Conversacion y traduccion en vivo con Gemini Live API (BYOK)" \
-      org.opencontainers.image.version="3.2.0"
+      org.opencontainers.image.version="3.3.1"
 
 WORKDIR /app
 

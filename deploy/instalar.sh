@@ -59,7 +59,7 @@ case "$MODO" in
     pgrep -a cloudflared | head -3 || echo "  (no encuentro el proceso cloudflared)"
     echo
     echo "· Caché de la app en Cloudflare (debe ser DYNAMIC, sin caché):"
-    curl -s -o /dev/null -D - "https://live.lockthard.es/index.html" | grep -i 'cf-cache-status\|cache-control' | tr -d '\r' || true
+    curl -s -o /dev/null -D - "https://live.loktar.cc/index.html" | grep -i 'cf-cache-status\|cache-control' | tr -d '\r' || true
     ;;
   logs) $COMPOSE logs --tail=80 -f ;;
   parar) $COMPOSE down ;;

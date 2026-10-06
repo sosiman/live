@@ -11,11 +11,11 @@
  *  · El micrófono no se silencia nunca: la cancelación de eco del navegador es
  *    la que evita que Onda se oiga a sí misma.
  */
-import { AudioEngine } from './audio.js?v=3.0.0';
-import { LiveSession, fetchModels, generateText, searchWeb, VOICES, modelCapabilities, explainLiveError } from './live.js?v=3.0.0';
-import { buildToolDeclarations, executeToolCall } from './tools.js?v=3.0.0';
+import { AudioEngine } from './audio.js?v=3.0.1';
+import { LiveSession, fetchModels, generateText, searchWeb, VOICES, modelCapabilities, explainLiveError } from './live.js?v=3.0.1';
+import { buildToolDeclarations, executeToolCall } from './tools.js?v=3.0.1';
 
-const APP_VERSION = '3.0.0';
+const APP_VERSION = '3.0.1';
 // Los nodos pueden estar en la ventana principal o en la flotante (se MUEVEN),
 // así que toda búsqueda se hace en el documento activo.
 const activeDoc = () => (pipWindow && pipWindow.document && pipWindow.document.body ? pipWindow.document : document);
@@ -846,7 +846,7 @@ $('btnFloat').addEventListener('click', () => {
 if ('serviceWorker' in navigator && window.isSecureContext) {
   addEventListener('load', async () => {
     try {
-      const registro = await navigator.serviceWorker.register('sw.js?v=3.0.0');
+      const registro = await navigator.serviceWorker.register('sw.js?v=3.0.1');
       // Busca versión nueva en cada arranque.
       registro.update().catch(() => {});
       // Cuando el service worker nuevo toma el control, se recarga UNA vez:

@@ -6,7 +6,7 @@ PWA en modo **BYOK** (cada usuario pone su clave de Google): el navegador habla
 **directo** con la Gemini Live API por WebSocket. No hay backend de IA, ni cuentas,
 ni base de datos, ni servidor que vea tu clave o tu audio.
 
-**En producción: <https://live.lockthard.es>**
+**En producción: <https://live.loktar.cc>**
 
 ![La app escuchando](docs/escucha.png)
 
@@ -96,13 +96,13 @@ Puedes instalarlo desde `/certificado`.
 
 ```sh
 node scripts/verify-app.mjs --key TU_CLAVE
-node scripts/verify-app.mjs --key TU_CLAVE --url https://live.lockthard.es
+node scripts/verify-app.mjs --key TU_CLAVE --url https://live.loktar.cc
 ```
 
-Abre Chrome por CDP y comprueba **38 cosas contra la API real**: sesión abierta,
+Abre Chrome por CDP y comprueba **41 cosas contra la API real**: sesión abierta,
 ritmo de audio, cancelación de eco, respuesta con voz, descarte del búfer al
 interrumpir, búsqueda con fuentes, resumen, contexto en vivo, barra de estado y
-ventana flotante. **Debe salir 38/38.**
+ventana flotante. **Debe salir 41/41.**
 
 ## Desplegar
 
@@ -128,6 +128,6 @@ Tunnel (el TLS lo pone Cloudflare, por eso el móvil obtiene micrófono sin avis
 
 ## Estado
 
-Verificado contra producción (**38/38**). Lo que falta está en
+Verificado contra producción (**41/41**). Lo que falta está en
 [`AGENTS.md`](AGENTS.md), que además documenta cada decisión y **los errores ya
 cometidos** para no repetirlos.

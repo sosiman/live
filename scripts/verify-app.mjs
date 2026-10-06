@@ -220,6 +220,8 @@ try {
   await cdp.evaluate('window.Onda.stop(); setTimeout(function () { window.Onda.start(); }, 1500); "ok"');
   for (let i = 0; i < 40; i++) { if (await cdp.evaluate('window.Onda.session && window.Onda.session.ready')) break; await new Promise((r) => setTimeout(r, 500)); }
   ok = check('La sesión se recupera tras el ciclo de memoria', await cdp.evaluate('Boolean(window.Onda.session && window.Onda.session.ready)'), 'sesión lista') && ok;
+  // Deja conversación para las pruebas siguientes (esta prueba vacía la transcripción).
+  await cdp.evaluate('window.Onda.transcript.push({ role: "me", text: "Conversación de prueba para el resumen.", sesion: 99 }, { role: "them", text: "De acuerdo, seguimos.", sesion: 99 }); "ok"');
 
   console.log('\n6c) Apartado «Investiga»: consulta y enlaces a la vista');
   const investiga = await cdp.evaluate('(function () { var n = document.querySelectorAll("#researchList .investigacion").length; var t = document.getElementById("researchList").textContent; var enlaces = document.querySelectorAll("#researchList .fuentes a").length; var href = enlaces ? document.querySelector("#researchList .fuentes a").href : ""; return { tarjetas: n, enlaces: enlaces, href: href, texto: t.slice(0, 120) }; })()');

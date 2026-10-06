@@ -9,7 +9,7 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
-    image: onda-live:2.9.6
+    image: onda-live:3.0.0
     container_name: onda-live
     restart: unless-stopped
     user: "1000:1000"

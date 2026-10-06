@@ -203,6 +203,24 @@ try {
   const datos = busqueda && busqueda.result ? JSON.stringify(busqueda.result) : '';
   ok = check('La búsqueda devuelve datos actuales con fuentes', /2026/.test(datos) || (busqueda && busqueda.result && busqueda.result.fuentes && busqueda.result.fuentes.length > 0), datos.slice(0, 160)) && ok;
 
+  console.log('\n6b2) Memoria entre sesiones (el Live API no la tiene: la pone la app)');
+  const dato = 'la clave del armario es 9987';
+  await cdp.evaluate('localStorage.removeItem("onda.memoria.v1"); window.Onda.transcript.length = 0; "ok"');
+  await cdp.evaluate('(function () { var i = document.getElementById("composerInput"); i.value = ' + JSON.stringify('Recuerda este dato: ' + dato + '.') + '; document.getElementById("composer").dispatchEvent(new Event("submit", { cancelable: true })); return "ok"; })()');
+  await new Promise((r) => setTimeout(r, 9000));
+  await cdp.evaluate('window.Onda.stop(); "ok"');
+  await new Promise((r) => setTimeout(r, 2500));
+  const guardada = await cdp.evaluate('(function () { var m = JSON.parse(localStorage.getItem("onda.memoria.v1") || "{}"); return { mensajes: (m.crudo || []).length, sesiones: m.sesiones }; })()');
+  ok = check('Lo hablado se guarda al parar la sesión', guardada.mensajes >= 1, JSON.stringify(guardada)) && ok;
+  await cdp.evaluate('window.Onda.transcript.length = 0; window.Onda.start(); "ok"');
+  for (let i = 0; i < 40; i++) { if (await cdp.evaluate('window.Onda.session && window.Onda.session.ready')) break; await new Promise((r) => setTimeout(r, 500)); }
+  await new Promise((r) => setTimeout(r, 1200));
+  const setupMem = await cdp.evaluate('JSON.stringify(window.Onda.session.buildSetup())');
+  ok = check('Al abrir de nuevo, el contexto lleva lo anterior', /CONVERSACIONES ANTERIORES/.test(setupMem) && setupMem.includes('9987'), setupMem.includes('9987') ? 'el dato viaja en el contexto' : 'el dato NO viaja') && ok;
+  await cdp.evaluate('window.Onda.stop(); setTimeout(function () { window.Onda.start(); }, 1500); "ok"');
+  for (let i = 0; i < 40; i++) { if (await cdp.evaluate('window.Onda.session && window.Onda.session.ready')) break; await new Promise((r) => setTimeout(r, 500)); }
+  ok = check('La sesión se recupera tras el ciclo de memoria', await cdp.evaluate('Boolean(window.Onda.session && window.Onda.session.ready)'), 'sesión lista') && ok;
+
   console.log('\n6c) Apartado «Investiga»: consulta y enlaces a la vista');
   const investiga = await cdp.evaluate('(function () { var n = document.querySelectorAll("#researchList .investigacion").length; var t = document.getElementById("researchList").textContent; var enlaces = document.querySelectorAll("#researchList .fuentes a").length; var href = enlaces ? document.querySelector("#researchList .fuentes a").href : ""; return { tarjetas: n, enlaces: enlaces, href: href, texto: t.slice(0, 120) }; })()');
   ok = check('La búsqueda aparece en «Investiga»', investiga.tarjetas >= 1, investiga.texto) && ok;

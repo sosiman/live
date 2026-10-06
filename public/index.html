@@ -20,7 +20,7 @@
   html.cargando .sheet, html.cargando .sheet-backdrop { display:none !important; }
   /* Sin fundido: la app aparece entera de golpe, sin frames a medias. */
 </style>
-<link rel="stylesheet" href="styles.css?v=2.9.6" onload="document.documentElement.classList.remove('cargando')" />
+<link rel="stylesheet" href="styles.css?v=3.0.0" onload="document.documentElement.classList.remove('cargando')" />
 </head>
 <body data-state="idle">
 
@@ -222,6 +222,14 @@
 
     <label class="field"><span>Silencio para cerrar tu turno (ms)</span><input type="number" id="silenceMs" value="700" min="300" step="50" /></label>
     <label class="field"><span>Volumen de la voz</span><input type="range" id="volume" min="0" max="100" value="100" /></label>
+    <div class="field">
+      <span>Memoria entre sesiones</span>
+      <label class="check"><input type="checkbox" id="rememberSessions" checked />
+        Recordar lo hablado y retomarlo al volver a encender el micrófono</label>
+      <small id="memoriaEstado">Sin memoria guardada todavía.</small>
+      <button type="button" class="wide-btn ghost" id="btnOlvidarMemoria">Olvidar conversaciones anteriores</button>
+    </div>
+
     <button type="button" class="wide-btn ghost" id="btnDiagnostico">🩺 Diagnóstico de pantalla</button>
     <pre class="diag" id="diagSalida" hidden></pre>
     <button type="button" class="wide-btn" id="btnForceUpdate">🔄 Forzar actualización (limpia la caché)</button>
@@ -234,7 +242,7 @@
 <div class="toast" id="toast" hidden></div>
 <script>
   /* === Autocuración de caché: funciona aunque app.js esté viejo === */
-  window.__ONDA_VERSION = '2.9.6';
+  window.__ONDA_VERSION = '3.0.0';
   window.__ondaLimpiar = function () {
     try {
       if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); });
@@ -267,6 +275,6 @@
     }, 2000);
   });
 </script>
-<script type="module" src="app.js?v=2.9.6"></script>
+<script type="module" src="app.js?v=3.0.0"></script>
 </body>
 </html>

@@ -39,6 +39,7 @@ Resultado medido en la suite de verificación: **primera voz en 0,7-1,3 s**, aud
 - **Búsqueda real en Google** con las fuentes a la vista (pestaña *Investiga*): consulta, resumen y enlaces de dónde lo saca.
 - **Panel de trabajo**: resúmenes de lo hablado y notas que pegas tú.
 - **Contexto en vivo**: cuántos tokens lleva consumidos el modelo, de qué (audio/texto) y cuánto le queda.
+- **Memoria entre sesiones**: guarda lo hablado y al volver a encender el micro le inyecta el contexto, asi que **recuerda** lo anterior (el Live API por si solo no lo hace: cada WebSocket arranca vacio).
 - **PWA instalable** y **ventana flotante** en el escritorio (document Picture-in-Picture).
 
 | Investiga | Panel | Barra de estado |

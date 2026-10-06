@@ -11,11 +11,11 @@
  *  · El micrófono no se silencia nunca: la cancelación de eco del navegador es
  *    la que evita que Onda se oiga a sí misma.
  */
-import { AudioEngine } from './audio.js?v=2.9.6';
-import { LiveSession, fetchModels, generateText, searchWeb, VOICES, modelCapabilities, explainLiveError } from './live.js?v=2.9.6';
-import { buildToolDeclarations, executeToolCall } from './tools.js?v=2.9.6';
+import { AudioEngine } from './audio.js?v=3.0.0';
+import { LiveSession, fetchModels, generateText, searchWeb, VOICES, modelCapabilities, explainLiveError } from './live.js?v=3.0.0';
+import { buildToolDeclarations, executeToolCall } from './tools.js?v=3.0.0';
 
-const APP_VERSION = '2.9.6';
+const APP_VERSION = '3.0.0';
 // Los nodos pueden estar en la ventana principal o en la flotante (se MUEVEN),
 // así que toda búsqueda se hace en el documento activo.
 const activeDoc = () => (pipWindow && pipWindow.document && pipWindow.document.body ? pipWindow.document : document);
@@ -67,6 +67,7 @@ const DEFAULTS = {
   resumption: true, toolTime: true, toolTranslate: true, toolVolume: true, toolStatus: true, toolSearch: true,
   // Modelo barato y con datos frescos para la busqueda y el boton «Sentido».
   textModel: 'gemini-3.8-flash',
+  rememberSessions: true,
 };
 
 const isAndroid = /Android/i.test(navigator.userAgent);
@@ -250,11 +251,92 @@ function getEngine() {
 }
 
 // ------------------------------------------------------------------ sesión
+// ----------------------------------------------------------- memoria persistente
+/**
+ * El contexto del modelo vive DENTRO del WebSocket: al parar se pierde y una
+ * sesion nueva empieza vacia. La API no guarda memoria entre conexiones, asi que
+ * la memoria la pone la app: se guarda lo hablado en el navegador y, al abrir
+ * sesion, se le inyecta un resumen como trasfondo.
+ */
+const MEM_STORE = 'onda.memoria.v1';
+let memoria = readJSON(MEM_STORE, { crudo: [], resumen: '', sucio: false, actualizado: 0, sesiones: 0 });
+let instruccionMemoria = '';
+const guardarMemoria = () => writeJSON(MEM_STORE, memoria);
+const memoriaVacia = () => !memoria.crudo.length && !memoria.resumen;
+
+/** Guarda lo hablado en esta sesion para las siguientes. */
+function recordarSesion() {
+  if (!settings.rememberSessions) return;
+  const nuevos = transcript.filter((m) => m.text && m.text.trim());
+  if (!nuevos.length) return;
+  memoria.crudo = memoria.crudo.concat(nuevos.map((m) => ({ role: m.role, text: m.text, at: m.at }))).slice(-600);
+  memoria.sesiones = (memoria.sesiones || 0) + 1;
+  memoria.sucio = true;
+  memoria.actualizado = Date.now();
+  guardarMemoria();
+  pintarMemoria();
+}
+
+/**
+ * Devuelve el bloque de memoria para el setup.
+ *  - Conversacion corta  -> se inyecta LITERAL (fidelidad total: nombres, cifras...).
+ *  - Conversacion larga  -> resumen de lo antiguo + los ultimos mensajes literales.
+ */
+const MEM_LITERAL = 6000;   // caracteres
+const MEM_RECIENTE = 12;    // mensajes que van siempre tal cual
+
+async function prepararMemoria() {
+  instruccionMemoria = '';
+  if (!settings.rememberSessions || memoriaVacia()) return;
+  const texto = memoria.crudo.map((m) => (m.role === 'me' ? 'Tu: ' : 'Onda: ') + m.text).join('\n');
+
+  const cabecera = 'CONTEXTO DE CONVERSACIONES ANTERIORES CON ESTE USUARIO (es trasfondo: no lo traduzcas, no lo leas en voz alta y no lo menciones salvo que te lo pidan):';
+
+  if (texto.length <= MEM_LITERAL) {
+    instruccionMemoria = cabecera + '\n' + texto;
+    return;
+  }
+
+  if (!memoria.resumen || memoria.sucio) {
+    const antiguo = memoria.crudo.slice(0, -MEM_RECIENTE).map((m) => (m.role === 'me' ? 'Tu: ' : 'Onda: ') + m.text).join('\n');
+    try {
+      memoria.resumen = await generateText({
+        apiKey: settings.apiKey, model: settings.textModel,
+        systemInstruction: 'Resume en tercera persona y en el idioma del usuario lo esencial de esta conversacion: temas, nombres propios, decisiones, datos concretos y pendientes. Maximo 15 lineas. Sin saludos ni relleno.',
+        prompt: antiguo,
+      });
+      memoria.sucio = false;
+      guardarMemoria();
+      pintarMemoria();
+    } catch { /* sin resumen se sigue, simplemente sin memoria */ }
+  }
+  if (memoria.resumen) {
+    const recientes = memoria.crudo.slice(-MEM_RECIENTE).map((m) => (m.role === 'me' ? 'Tu: ' : 'Onda: ') + m.text).join('\n');
+    instruccionMemoria = cabecera + '\n' + memoria.resumen + '\n\nUltimos mensajes, literales:\n' + recientes;
+  }
+}
+
+function pintarMemoria() {
+  const el = $('memoriaEstado');
+  if (!el) return;
+  if (!settings.rememberSessions) { el.textContent = 'Memoria desactivada: cada sesion empieza de cero.'; return; }
+  if (memoriaVacia()) { el.textContent = 'Sin memoria guardada todavia.'; return; }
+  const cuando = memoria.actualizado ? new Date(memoria.actualizado).toLocaleString('es-ES') : '';
+  el.textContent = 'Guardados ' + memoria.crudo.length + ' mensajes de ' + (memoria.sesiones || 0) + ' sesion(es). Ultima: ' + cuando + '.';
+}
+
+function olvidarMemoria() {
+  memoria = { crudo: [], resumen: '', sucio: false, actualizado: 0, sesiones: 0 };
+  guardarMemoria();
+  pintarMemoria();
+  toast('Memoria borrada: la proxima sesion empieza de cero.', 3000);
+}
+
 function configForSession() {
   const caps = modelCapabilities(settings.model);
   return {
     voice: settings.voice,
-    systemInstruction: settings.systemInstruction,
+    systemInstruction: [settings.systemInstruction, instruccionMemoria].filter(Boolean).join('\n\n'),
     silenceMs: Number(settings.silenceMs) || 700,
     resumption: settings.resumption,
     tools: caps.canUseTools ? buildToolDeclarations(settings) : [],
@@ -276,6 +358,8 @@ async function startSession() {
     if (!audio.source) await audio.addMicrophone();
     else await audio.startCapture();
 
+    setStatus('Preparando memoria…');
+    await prepararMemoria();
     session = new LiveSession({ apiKey: settings.apiKey, model: settings.model, config: configForSession() });
     wireSession(session);
     await session.connect();
@@ -288,6 +372,7 @@ async function startSession() {
     setState('listening');
     setStatus('Escuchando');
     ponerMandos(false);
+    if (instruccionMemoria) toast('Memoria cargada: ' + memoria.crudo.length + ' mensajes de ' + (memoria.sesiones || 0) + ' sesión(es).', 3600);
     $('hint').textContent = 'Habla con normalidad · puedes interrumpirla cuando quieras';
     renderContexto();
   } catch (err) {
@@ -397,6 +482,7 @@ function toolContext() {
 }
 
 function stopSession() {
+  recordarSesion();
   running = false;
   session?.close();
   session = null;
@@ -532,6 +618,8 @@ $('backdrop').addEventListener('click', closeSheets);
 for (const b of document.querySelectorAll('[data-close]')) b.addEventListener('click', closeSheets);
 
 function syncUI() {
+  if ($('rememberSessions')) $('rememberSessions').checked = settings.rememberSessions !== false;
+  pintarMemoria();
   $('apiKey').value = settings.apiKey;
   $('modelSelect').value = settings.model;
   $('voiceSelect').value = settings.voice;
@@ -668,6 +756,14 @@ $('btnDiagnostico').addEventListener('click', async () => {
   catch { toast('Diagnóstico en pantalla (el portapapeles está bloqueado).', 3200); }
 });
 
+$('btnOlvidarMemoria').addEventListener('click', olvidarMemoria);
+$('rememberSessions').addEventListener('change', (e) => {
+  settings.rememberSessions = e.target.checked;
+  saveSettings();
+  pintarMemoria();
+  toast(e.target.checked ? 'Memoria activada.' : 'Memoria desactivada.', 2400);
+});
+
 $('btnForceUpdate').addEventListener('click', async () => {
   const boton = $('btnForceUpdate');
   boton.textContent = 'Actualizando…';
@@ -750,7 +846,7 @@ $('btnFloat').addEventListener('click', () => {
 if ('serviceWorker' in navigator && window.isSecureContext) {
   addEventListener('load', async () => {
     try {
-      const registro = await navigator.serviceWorker.register('sw.js?v=2.9.6');
+      const registro = await navigator.serviceWorker.register('sw.js?v=3.0.0');
       // Busca versión nueva en cada arranque.
       registro.update().catch(() => {});
       // Cuando el service worker nuevo toma el control, se recarga UNA vez:
@@ -977,6 +1073,7 @@ function boot() {
   if (!window.isSecureContext) toast('Sin HTTPS el micrófono está bloqueado. Abre la app con https://', 8000);
   renderResearch();
   renderBoard();
+  pintarMemoria();
   renderContexto();
   if (settings.apiKey) loadModels(true);
 }

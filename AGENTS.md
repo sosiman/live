@@ -143,11 +143,24 @@ tanto se estima con `bytes/1280` (25 tokens por segundo de audio).
    pestañas lleva `calc(16px + var(--safe-b))` de margen inferior. Medido con Chrome
    por CDP a 360x640, 360x744, 360x800 y 393x852: la barra termina siempre dentro de
    la ventana (`tabbar.bottom` 624/728/784/836 con ventanas 640/744/800/852).
-12. **No depender del `app.js` para salir de una caché rota.** El `index.html` lleva un
+12. **El Live API no tiene memoria entre sesiones: la pone la app.** Cada WebSocket
+   arranca con el contexto vacío (medido: 1277 → 0 al parar), y `sessionResumption`
+   solo sirve para reconectar a la MISMA sesión, no para volver mañana. Por eso
+   `app.js` guarda lo hablado en `localStorage` (`onda.memoria.v1`) y al abrir sesión
+   inyecta un bloque de contexto en el `systemInstruction`:
+   · conversación corta (< 6000 caracteres) → **literal**, sin resumir (fidelidad total:
+     nombres, cifras, claves);
+   · conversación larga → resumen con `gemini-3.8-flash` de lo antiguo + los últimos
+     12 mensajes literales.
+   Verificado de punta a punta: se le da un dato en una sesión, se para, y al volver
+   responde con él («La clave es 4471»). Ojo al probarlo: hay que usar el compositor o
+   la voz (que sí registran en la transcripción), **no** `session.sendTurn()` directo,
+   o el dato no se guarda y la prueba miente.
+13. **No depender del `app.js` para salir de una caché rota.** El `index.html` lleva un
    script **inline** con `window.__ONDA_VERSION`: si la versión cargada no coincide,
    borra service workers y cachés y recarga. El botón «Forzar actualización» también
    se atiende desde ese script, así que funciona aunque el `app.js` esté viejo.
-13. **La purga de Cloudflare puede fallar sin romper nada.** Si el token caduca o se rota
+14. **La purga de Cloudflare puede fallar sin romper nada.** Si el token caduca o se rota
    (pasó el 2026-09-17), `cloudflare-cache.py` devuelve 403 y `instalar.sh` sigue
    desplegando: la Cache Rule y el `browser_cache_ttl` ya aplicados **persisten**, y con
    las URLs versionadas la purga es solo una comodidad. Para reactivarla, actualizar

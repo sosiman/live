@@ -1,7 +1,7 @@
 {
-  "name": "Forever — habla y traduce en tiempo real",
+  "name": "Forever — tu especialista de World of Warcraft",
   "short_name": "Forever",
-  "description": "Conversación y traducción en vivo con Gemini Live API. Tu clave, tu navegador.",
+  "description": "Pregúntale al oído todo sobre World of Warcraft: loot, BiS, builds, macros, addons, misiones, mapas y jefes.",
   "lang": "es",
   "start_url": "./",
   "scope": "./",

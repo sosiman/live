@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const CERT_DIR = path.join(__dirname, 'certs');
-const VERSION = '3.1.0';
+const VERSION = '3.2.0';
 
 const args = process.argv.slice(2);
 const flag = (name, def = null) => {

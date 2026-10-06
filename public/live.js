@@ -69,11 +69,17 @@ export async function fetchModels(apiKey) {
  * con generateContent + googleSearch sí grounded y devuelve consultas y
  * fuentes. El resultado se le pasa al modelo en vivo como respuesta de tool.
  */
-export async function searchWeb({ apiKey, model = 'gemini-3.8-flash', query, maxResultados = 4 }) {
+export async function searchWeb({ apiKey, model = 'gemini-3.8-flash', query, sitio, maxResultados = 5 }) {
   if (!apiKey) throw new Error('Falta la clave de API.');
+  // `sitio` limita la busqueda a una web concreta (site:). Sirve para dirigir la
+  // investigacion a las fuentes que usa la comunidad (wowhead, icy-veins, murlok...).
+  const consulta = sitio ? query + ' site:' + sitio : query;
   const body = {
-    contents: [{ role: 'user', parts: [{ text: query }] }],
+    contents: [{ role: 'user', parts: [{ text: consulta }] }],
     tools: [{ googleSearch: {} }],
+    systemInstruction: { parts: [{ text:
+      'Responde con datos concretos y verificables: nombres exactos, cifras, zonas, coordenadas, ' +
+      'porcentajes y fechas si los hay. Se breve (4-6 lineas), sin Markdown y sin listas largas.' }] },
     generationConfig: { temperature: 0.2, maxOutputTokens: 1024 },
   };
   const json = await rest('/models/' + model + ':generateContent', apiKey, { method: 'POST', body: JSON.stringify(body) });

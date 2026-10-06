@@ -10,13 +10,25 @@ export function buildToolDeclarations(settings = {}) {
   if (settings.toolSearch !== false) {
     declarations.push({
       name: 'buscar_en_web',
-      description: 'Busca en Google informacion ACTUAL y devuelve un resumen con las fuentes. ' +
-        'Usala SIEMPRE antes de responder sobre noticias, resultados deportivos, precios, cargos, ' +
-        'estrenos, versiones de software o cualquier dato que pueda haber cambiado. Nunca contestes ' +
-        'esos temas de memoria, y no digas que no puedes buscar: llama a la herramienta.',
+      description: 'Busca en internet informacion ACTUAL y devuelve un resumen con las fuentes. ' +
+        'Usala SIEMPRE antes de responder sobre loot, porcentajes de drop, vendedores, precios, ' +
+        'estadisticas, BiS, builds, talentos, sims, notas de parche, fechas de temporada o cualquier ' +
+        'dato que pueda haber cambiado. Nunca contestes eso de memoria ni digas que no puedes buscar.',
       parameters: {
         type: 'OBJECT',
-        properties: { consulta: { type: 'STRING', description: 'Que buscar, en el idioma que sea mas util.' } },
+        properties: {
+          consulta: { type: 'STRING', description: 'Que buscar, en el idioma que sea mas util.' },
+          fuente: {
+            type: 'STRING',
+            description: 'Web donde buscar (opcional, recomendado). Valores: ' +
+              'wowhead (objetos, misiones, NPCs, mapas, coordenadas, drop), ' +
+              'wowhead-es (lo mismo en espanol), icy-veins (guias de clase, raids, dungeons), ' +
+              'murlok (builds y stats reales de M+ y PvP), raiderio (puntuacion M+), ' +
+              'warcraftlogs (logs y parses), wago (WeakAuras), curseforge (addons), ' +
+              'wowprogress (progresion de guilds), method (guias), simc (simulaciones), ' +
+              'general (cuando no sepas cual).',
+          },
+        },
         required: ['consulta'],
       },
     });
@@ -80,7 +92,7 @@ export async function executeToolCall(name, args = {}, ctx = {}) {
       if (!consulta) return { ok: false, error: 'Falta la consulta.' };
       if (!ctx.search) return { ok: false, error: 'La busqueda no esta disponible.' };
       try {
-        const r = await ctx.search(consulta);
+        const r = await ctx.search(consulta, String(args.fuente || '').trim());
         return { ok: true, resumen: r.resumen, fuentes: r.fuentes, consultas: r.consultas, fecha_consulta: r.fecha };
       } catch (err) {
         return { ok: false, error: String(err.message || err) };

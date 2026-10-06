@@ -1,6 +1,12 @@
 # Forever
 
-**Conversación y traducción en vivo con latencia mínima sobre los modelos `gemini-3.8-live`.**
+**Agente de voz especializado en World of Warcraft, con latencia mínima, sobre los modelos `gemini-3.8-live`.**
+
+Le preguntas hablando (o escribiendo) y te contesta en dos segundos: loot y porcentajes,
+BiS y builds, talentos y prioridad de stats, macros, addons y WeakAuras, misiones, mapas y
+coordenadas, jefes y mecánicas, notas de parche. Cuando el dato puede haber cambiado,
+**busca en las webs que usa la comunidad** (Wowhead, Icy Veins, Murlok.io, Raider.IO,
+Warcraft Logs, Wago, CurseForge, Method…) y te deja las fuentes a la vista en *Investiga*.
 
 *(El proyecto nació como «Onda Live»: el directorio, el contenedor y las claves
 internas del navegador conservan ese nombre para no perder ajustes ni romper el despliegue.)*
@@ -14,6 +20,22 @@ ni base de datos, ni servidor que vea tu clave o tu audio.
 ![La app escuchando](docs/forever-escucha.png)
 
 ---
+
+## Fuentes que consulta (búsqueda guiada)
+
+| Fuente | Para qué |
+| :--- | :--- |
+| **Wowhead** / Wowhead-ES | objetos, misiones, NPCs, mapas, coordenadas, porcentajes de drop |
+| **Icy Veins** | guías de clase, subida de nivel, raids y mazmorras |
+| **Murlok.io** | builds y stats reales de los mejores en M+ y PvP |
+| **Raider.IO** | puntuación M+, runs y rankings |
+| **Warcraft Logs** | logs, parses y rankings de raid |
+| **Wago.io** | WeakAuras y perfiles de Plater |
+| **CurseForge** | addons, versiones y descargas |
+| **WowProgress · Method · SimC** | progresión de guilds, guías de alto nivel, simulaciones |
+
+El modelo elige la fuente con el argumento `fuente` de la herramienta, y cada búsqueda queda
+guardada con su consulta y sus enlaces.
 
 ## Por qué «cero latencia»
 
@@ -36,8 +58,8 @@ Resultado medido en la suite de verificación: **primera voz en 0,7-1,3 s**, aud
 
 ## Qué hace
 
-- **Escucha e interpreta en tiempo real**: traduce lo que oye y solo conversa si le hablas a él.
-- **Traducción en los dos sentidos**: detecta el idioma de la otra persona (ucraniano, inglés, el que sea) y traduce hacia ti; lo que tú dices, lo traduce hacia ella. El idioma de destino no está fijado.
+- **Escucha y contesta en tiempo real**: traduce lo que oye y solo conversa si le hablas a él.
+- **Modo traductor** (a demanda, con «modo traductor»): traduce e interpreta lo que oiga, en los dos sentidos: detecta el idioma de la otra persona (ucraniano, inglés, el que sea) y traduce hacia ti; lo que tú dices, lo traduce hacia ella. El idioma de destino no está fijado.
 - **Comandos por voz**: «modo traductor», «empieza a traducir», «modo conversación», «para de traducir».
 - **Búsqueda real en Google** con las fuentes a la vista (pestaña *Investiga*): consulta, resumen y enlaces de dónde lo saca.
 - **Panel de trabajo**: resúmenes de lo hablado y notas que pegas tú.

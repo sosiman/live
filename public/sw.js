@@ -1,6 +1,6 @@
 /* Onda Live — service worker: red primero, caché como respaldo sin conexión. */
-const CACHE = 'onda-v34';
-const SHELL = ['./?v=3.1.0', 'index.html?v=3.1.0', 'styles.css?v=3.1.0', 'app.js?v=3.1.0', 'audio.js?v=3.1.0', 'live.js?v=3.1.0', 'tools.js?v=3.1.0', 'pcm-worklet.js?v=3.1.0', 'pcm-player-worklet.js?v=3.1.0', 'manifest.webmanifest?v=3.1.0'];
+const CACHE = 'onda-v35';
+const SHELL = ['./?v=3.2.0', 'index.html?v=3.2.0', 'styles.css?v=3.2.0', 'app.js?v=3.2.0', 'audio.js?v=3.2.0', 'live.js?v=3.2.0', 'tools.js?v=3.2.0', 'pcm-worklet.js?v=3.2.0', 'pcm-player-worklet.js?v=3.2.0', 'manifest.webmanifest?v=3.2.0'];
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });

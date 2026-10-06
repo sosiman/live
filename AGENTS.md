@@ -18,7 +18,9 @@ Una PWA que **habla y traduce en tiempo real** con la Gemini Live API, en modo
 con Google. No hay backend de IA, ni cuentas, ni base de datos.
 
 - Conversación de voz fluida y **se puede interrumpir hablando** en cualquier momento.
-- Actúa de **intérprete**: traduce lo que oye y solo conversa si le hablas a él.
+- Es un **especialista en World of Warcraft**: loot, BiS, builds, macros, addons, misiones,
+  mapas, jefes y parches. Contesta corto y hablado; cuando el dato puede cambiar, **busca**.
+- **Modo traductor** a demanda («modo traductor»): sigue disponible para interpretar voz.
 - **Busca en Google de verdad** (con fuentes visibles) y **resume** lo hablado.
 - PWA instalable, formato móvil siempre, y **ventana flotante** en el escritorio.
 

@@ -64,7 +64,7 @@ const otros = [
   ['server.mjs', /const VERSION = '[^']+';/, "const VERSION = '" + V + "';"],
   ['package.json', /"version": "[^"]+"/, '"version": "' + V + '"'],
   ['Dockerfile', /org\.opencontainers\.image\.version="[^"]+"/, 'org.opencontainers.image.version="' + V + '"'],
-  ['deploy/compose.yaml', /image: onda-live:[^\s]+/, 'image: onda-live:' + V],
+  ['deploy/compose.yaml', /image: wow-agent:[^\s]+/, 'image: wow-agent:' + V],
 ];
 for (const [f, patron, nuevo] of otros) {
   const s = leer(f).replace(patron, nuevo);

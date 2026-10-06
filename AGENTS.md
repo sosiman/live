@@ -1,6 +1,6 @@
 # Forever (antes «Onda Live») — instrucciones para agentes
 
-> **Nombre visible: Forever.** El directorio (`onda-live`), el contenedor (`onda-live`),
+> **Nombre visible: Forever.** El directorio (`wow-agent`), el contenedor (`wow-agent`),
 > el slug del health y las claves de `localStorage` (`onda.*`) conservan el nombre
 > antiguo a propósito: renombrarlos borraría ajustes y memoria de los usuarios y
 > obligaría a recrear el contenedor. El logo es `public/icons/logo.svg`.
@@ -178,7 +178,7 @@ tanto se estima con `bytes/1280` (25 tokens por segundo de audio).
 ## 5. Mapa de archivos
 
 ```
-onda-live/
+wow-agent/
 ├── server.mjs                 servidor estático (HTTP/HTTPS), sin dependencias
 ├── Dockerfile                 imagen node:22-alpine, usuario «node», solo lectura
 ├── deploy/
@@ -221,8 +221,8 @@ node scripts/sellar-version.mjs
 # 3. Comprobar que arranca sin errores de consola
 node scripts/verify-app.mjs --key TU_CLAVE
 # 4. Desplegar
-tar czf - --exclude=certs --exclude=.git --exclude=node_modules . | ssh root@192.168.0.50 'mkdir -p /opt/onda-live && tar xzf - -C /opt/onda-live'
-ssh root@192.168.0.50 'cd /opt/onda-live && ./deploy/instalar.sh actualizar'
+tar czf - --exclude=certs --exclude=.git --exclude=node_modules . | ssh root@192.168.0.50 'mkdir -p /opt/wow-agent && tar xzf - -C /opt/wow-agent'
+ssh root@192.168.0.50 'cd /opt/wow-agent && ./deploy/instalar.sh actualizar'
 ```
 
 La verificación abre Chrome por CDP y comprueba de verdad: sesión abierta,
@@ -241,10 +241,10 @@ el certificado autofirmado se acepta una vez, o se instala desde `/certificado`.
 ```sh
 # desde este equipo
 tar czf - --exclude=certs --exclude=.git --exclude=node_modules . \
-  | ssh root@192.168.0.50 'mkdir -p /opt/onda-live && tar xzf - -C /opt/onda-live'
+  | ssh root@192.168.0.50 'mkdir -p /opt/wow-agent && tar xzf - -C /opt/wow-agent'
 
 # en el servidor
-ssh root@192.168.0.50 'cd /opt/onda-live && ./deploy/instalar.sh desplegar'
+ssh root@192.168.0.50 'cd /opt/wow-agent && ./deploy/instalar.sh desplegar'
 ```
 
 - Contenedor **sin privilegios**: usuario `node` (1000), `read_only`, `cap_drop: ALL`,

@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const CERT_DIR = path.join(__dirname, 'certs');
-const VERSION = '3.3.2';
+const VERSION = '3.3.3';
 
 const args = process.argv.slice(2);
 const flag = (name, def = null) => {
@@ -49,13 +49,13 @@ const send = (res, status, body, headers = {}) => { res.writeHead(status, { 'Cac
 function handler(req, res) {
   const url = req.url ?? '/';
   if (url.startsWith('/__health')) {
-    return send(res, 200, JSON.stringify({ ok: true, app: 'onda-live', version: VERSION, uptime: process.uptime() }), { 'Content-Type': MIME['.json'] });
+    return send(res, 200, JSON.stringify({ ok: true, app: 'wow-agent', version: VERSION, uptime: process.uptime() }), { 'Content-Type': MIME['.json'] });
   }
   if (url.startsWith('/certificado')) {
     try {
       return send(res, 200, fs.readFileSync(path.join(CERT_DIR, 'cert.pem')), {
         'Content-Type': 'application/x-x509-ca-cert',
-        'Content-Disposition': 'attachment; filename="onda-live.crt"',
+        'Content-Disposition': 'attachment; filename="wow-agent.crt"',
       });
     } catch { return send(res, 404, 'Certificado no disponible'); }
   }

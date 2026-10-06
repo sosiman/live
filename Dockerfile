@@ -7,7 +7,7 @@ FROM node:22-alpine
 
 LABEL org.opencontainers.image.title="Onda Live" \
       org.opencontainers.image.description="Conversacion y traduccion en vivo con Gemini Live API (BYOK)" \
-      org.opencontainers.image.version="3.3.2"
+      org.opencontainers.image.version="3.3.3"
 
 WORKDIR /app
 

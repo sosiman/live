@@ -134,8 +134,8 @@ ventana flotante. **Debe salir 41/41.**
 ```sh
 node scripts/sellar-version.mjs      # versiona las URLs (obligatorio antes de desplegar)
 tar czf - --exclude=certs --exclude=.git --exclude=node_modules . \
-  | ssh root@TU_SERVIDOR 'mkdir -p /opt/onda-live && tar xzf - -C /opt/onda-live'
-ssh root@TU_SERVIDOR 'cd /opt/onda-live && ./deploy/instalar.sh actualizar'
+  | ssh root@TU_SERVIDOR 'mkdir -p /opt/wow-agent && tar xzf - -C /opt/wow-agent'
+ssh root@TU_SERVIDOR 'cd /opt/wow-agent && ./deploy/instalar.sh actualizar'
 ```
 
 El contenedor es **node:22-alpine sin privilegios**: usuario `node`, sistema de

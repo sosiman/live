@@ -20,7 +20,7 @@
   html.cargando .sheet, html.cargando .sheet-backdrop { display:none !important; }
   /* Sin fundido: la app aparece entera de golpe, sin frames a medias. */
 </style>
-<link rel="stylesheet" href="styles.css?v=3.3.2" onload="document.documentElement.classList.remove('cargando')" />
+<link rel="stylesheet" href="styles.css?v=3.3.3" onload="document.documentElement.classList.remove('cargando')" />
 </head>
 <body data-state="idle">
 
@@ -248,7 +248,7 @@
 <div class="toast" id="toast" hidden></div>
 <script>
   /* === Autocuración de caché: funciona aunque app.js esté viejo === */
-  window.__ONDA_VERSION = '3.3.2';
+  window.__ONDA_VERSION = '3.3.3';
   window.__ondaLimpiar = function () {
     try {
       if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); });
@@ -281,6 +281,6 @@
     }, 2000);
   });
 </script>
-<script type="module" src="app.js?v=3.3.2"></script>
+<script type="module" src="app.js?v=3.3.3"></script>
 </body>
 </html>

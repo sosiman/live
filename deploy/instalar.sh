@@ -47,7 +47,7 @@ case "$MODO" in
     echo "· Salud en local:"
     salud || true
     echo "· Usuario dentro del contenedor (debe ser «node», no root):"
-    docker exec onda-live id
+    docker exec wow-agent id
     purgar_cache
     ;;
   estado)
